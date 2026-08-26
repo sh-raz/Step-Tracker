@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.xcarchive
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.html
+fastlane/test_output
+
+# Swift generated files
+*.swiftdoc
+*.swiftmodule
+*.swiftsourceinfo
+*.dSYM
+*.dSYM.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
