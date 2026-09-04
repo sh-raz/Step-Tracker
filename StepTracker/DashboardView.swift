@@ -66,7 +66,7 @@ struct DashboardView: View {
                     .padding()
                     .background {
                         RoundedRectangle(cornerRadius: 15)
-                        .fill(Color(.secondarySystemBackground))
+                            .fill(Color(.secondarySystemBackground))
                     }
                     
                     
@@ -93,7 +93,6 @@ struct DashboardView: View {
             }
             .padding()
             .task {
-                //await hkManager.addSimulatorData()
                 isShowingPermissionPrimingSheet = !hasSeenPermissionPriming
             }
             .navigationTitle("Dashboard")
