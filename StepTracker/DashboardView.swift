@@ -30,6 +30,12 @@ struct DashboardView: View {
     @State private var isShowingPermissionPrimingSheet = false
     var isSteps: Bool { selectedStat == .steps}
     
+    var avgSteps: Double {
+        guard !hkManager.stepsData.isEmpty else {return 0}
+        let total = hkManager.stepsData.reduce(0) { $0 + $1.value }
+        return total / Double(hkManager.stepsData.count)
+    }
+    
     var body: some View {
         NavigationStack{
             ScrollView{
@@ -50,7 +56,7 @@ struct DashboardView: View {
                                     Label("Steps", systemImage: "figure.walk")
                                         .font(.title3.bold())
                                         .foregroundStyle(Color.pink)
-                                    Text("Avg: 10K Steps")
+                                    Text("Avg: \(Int(avgSteps)) Steps")
                                         .font(.caption)
                                 }
                                 Spacer()
@@ -61,6 +67,10 @@ struct DashboardView: View {
                         .foregroundStyle(Color.secondary)
                         
                         Chart {
+                            RuleMark(y: .value("Average", avgSteps))
+                                .lineStyle(.init(lineWidth: 0.6, dash: [5]))
+                                .foregroundStyle(Color.secondary)
+                            
                             ForEach(hkManager.stepsData) { step in
                                 BarMark(
                                     x: .value("Date", step.date, unit: .day),
@@ -68,6 +78,18 @@ struct DashboardView: View {
                             }
                         }
                         .frame(height: 150)
+                        .chartXAxis {
+                            AxisMarks{
+                                AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                            }
+                        }
+                        .chartYAxis{
+                            AxisMarks { value in
+                                AxisGridLine()
+                                    .foregroundStyle(Color.secondary.opacity(0.3))
+                                AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                            }
+                        }
                     }
                     .padding()
                     .background {
