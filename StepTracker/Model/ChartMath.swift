@@ -10,7 +10,7 @@ import Algorithms
 
 struct ChartMath {
     
-    func averagePerWeek(for metrics: [HealthMetric]) -> [WeekdayDataType] {
+   static func averagePerWeek(for metrics: [HealthMetric]) -> [WeekdayDataType] {
         var stepPerWeekday: [WeekdayDataType] = []
         let sortedMetrics = metrics.sorted{ $0.date.weekdayInt < $1.date.weekdayInt }
         let weekdayArrays = sortedMetrics.chunked{ $0.date.weekdayInt == $1.date.weekdayInt }
