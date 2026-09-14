@@ -12,6 +12,9 @@ struct WeightLineChart: View {
     
     var selectedStat: HealthMetricContext
     var chartData: [HealthMetric]
+    var minWeight: Double {
+        return chartData.min{ $0.value < $1.value }?.value ?? 0
+    }
     
     
     var body: some View {
@@ -34,19 +37,41 @@ struct WeightLineChart: View {
             
             Chart {
                 ForEach(chartData) { weight in
+                    RuleMark(y: .value("Goal", 155))
+                        .foregroundStyle(.mint)
+                        .lineStyle(.init(lineWidth: 1, dash: [5]))
+                    
                     AreaMark(
                         x: .value("Date", weight.date, unit: .day),
-                        y: .value("Weights", weight.value)
+                        yStart: .value("Weight", weight.value),
+                        yEnd: .value("Min value", minWeight)
                     )
-                    .foregroundStyle(Gradient(colors: [.blue.opacity(0.5), .clear]))
-                    
+                    .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
+                    .interpolationMethod(.catmullRom)
+
                     LineMark(
                         x: .value("Date", weight.date, unit: .day),
                         y: .value("Weights", weight.value)
                     )
+                    .foregroundStyle(.indigo)
+                    .interpolationMethod(.catmullRom)
+                    .symbol(.circle)
                 }
             }
             .frame(height: 150)
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis {
+                AxisMarks{
+                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                }
+            }
+            .chartYAxis {
+                AxisMarks{
+                    AxisGridLine()
+                        .foregroundStyle(Color.secondary.opacity(0.3))
+                    AxisValueLabel()
+                }
+            }
         }
         .padding()
         .background {
