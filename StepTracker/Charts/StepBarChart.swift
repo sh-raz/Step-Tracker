@@ -106,7 +106,6 @@ struct StepBarChart: View {
             .fill(Color(.secondarySystemBackground))
             .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
         )
-        
     }
 }
 
