@@ -49,6 +49,7 @@ import Observation
         
     }
     
+    
     func fetchWeight() async {
         let calendar = Calendar.current
         let startOfToday = calendar.startOfDay(for: .now)
@@ -105,6 +106,30 @@ import Observation
             
         }
     }
+    
+    
+    func addStepData(date: Date, value: Double) async {
+        let stepQuantity = HKQuantity(unit: .count(), doubleValue: value)
+        let StepSample = HKQuantitySample(type: HKQuantityType(.stepCount), quantity: stepQuantity, start: date, end: date)
+        do{
+            try await healthStore.save(StepSample)
+        }catch{
+            print(error)
+        }
+    }
+    
+    
+    func addWeightData(date: Date, value: Double) async {
+        let weightQuantity = HKQuantity(unit: .pound(), doubleValue: value)//.gramUnit(with: .kilo)
+        let WeightSample = HKQuantitySample(type: HKQuantityType(.bodyMass), quantity: weightQuantity, start: date, end: date)
+        do{
+            try await healthStore.save(WeightSample)
+        }catch{
+            print(error)
+        }
+    }
+    
+    
     
     
     
