@@ -60,14 +60,27 @@ struct HealthDataListView: View {
                         Task{
                             switch metric {
                             case .steps:
-                                await hkManager.addStepData(date: addedDate, value: Double(addedValue)!)
-                                await hkManager.fetchStepCount()
-                                isShowingAddData = false
+                                do{
+                                    try await hkManager.addStepData(date: addedDate, value: Double(addedValue)!)
+                                    try await hkManager.fetchStepCount()
+                                    isShowingAddData = false
+                                }catch STError.sharingDenied(let quantityType){
+                                    print("❌ Sharing permission has been denied for \(quantityType)")
+                                }catch{
+                                    print("❌ Unable to complete the request.")
+                                }
+                                
                             case .weight:
-                                await hkManager.addWeightData(date: addedDate, value: Double(addedValue)!)
-                                await hkManager.fetchWeight()
-                                await hkManager.fetchWeightForDifferentials()
-                                isShowingAddData = false
+                                do{
+                                    try await hkManager.addWeightData(date: addedDate, value: Double(addedValue)!)
+                                    try await hkManager.fetchWeight()
+                                    try await hkManager.fetchWeightForDifferentials()
+                                    isShowingAddData = false
+                                }catch STError.sharingDenied(let quantityType){
+                                    print("❌ Sharing permission has been denied for \(quantityType)")
+                                }catch{
+                                    print("❌ Unable to complete the request.")
+                                } 
                             }
                         }
                     }
