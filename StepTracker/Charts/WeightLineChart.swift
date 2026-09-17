@@ -10,6 +10,8 @@ import Charts
 
 struct WeightLineChart: View {
     @State private var selectedDate: Date?
+    @State private var selectedDay: Date?
+
     
     var selectedStat: HealthMetricContext
     var chartData: [HealthMetric]
@@ -97,7 +99,14 @@ struct WeightLineChart: View {
                 RoundedRectangle(cornerRadius: 15)
                     .fill(Color(.secondarySystemBackground))
             }
+            .onChange(of: selectedDate) { oldValue, newValue in
+                guard let old = oldValue, let new = newValue else { return }
+                if !Calendar.current.isDate(old, inSameDayAs: new){
+                    selectedDay = new
+                }
+            }
         }
+    
     
     var annotationView: some View {
         VStack{
@@ -114,7 +123,6 @@ struct WeightLineChart: View {
             .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
         )
     }
-    
 }
 
 

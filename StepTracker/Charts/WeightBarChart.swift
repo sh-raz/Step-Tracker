@@ -10,6 +10,7 @@ import Charts
 
 struct WeightBarChart: View {
     @State private var selectedWeekday: Date?
+    @State private var selectedDay: Date?
     
     var chartData: [WeekdayDataType]
     
@@ -75,6 +76,13 @@ struct WeightBarChart: View {
         .background {
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.secondarySystemBackground))
+        }
+        .sensoryFeedback(.selection, trigger: selectedDay)
+        .onChange(of: selectedWeekday) { oldValue, newValue in
+            guard let old = oldValue, let new = newValue else { return }
+            if !Calendar.current.isDate(old, inSameDayAs: new){
+                selectedDay = new
+            }
         }
     }
     

@@ -13,6 +13,7 @@ struct StepBarChart: View {
     var chartData: [HealthMetric]
     var selectedStat: HealthMetricContext
     @State private var selectedDate: Date?
+    @State private var selectedDay: Date?
 
     
     var avgSteps: Double {
@@ -67,7 +68,7 @@ struct StepBarChart: View {
                         y: .value("Steps", step.value)
                     )
                     .foregroundStyle(Color.pink.gradient)
-                    .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)
+                    .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)//?
                 }
             }
             .frame(height: 150)
@@ -90,7 +91,15 @@ struct StepBarChart: View {
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.secondarySystemBackground))
         }
+        .sensoryFeedback(.selection, trigger: selectedDay)
+        .onChange(of: selectedDate) { oldValue, newValue in
+            guard let old = oldValue, let new = newValue else { return }
+            if !Calendar.current.isDate(old, inSameDayAs: new){
+                selectedDay = new
+            }
+        }
     }
+   
     
     var annotationView: some View {
         VStack{
