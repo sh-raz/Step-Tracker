@@ -13,6 +13,8 @@ struct HealthDataListView: View {
     @State private var isShowingAddData: Bool = false
     @State private var addedDate: Date = .now
     @State private var addedValue: String = ""
+    @State private var isShowingAlert = false
+    @State private var writeError: STError = .noData
     
     var metric : HealthMetricContext
     
@@ -65,9 +67,11 @@ struct HealthDataListView: View {
                                     try await hkManager.fetchStepCount()
                                     isShowingAddData = false
                                 }catch STError.sharingDenied(let quantityType){
-                                    print("❌ Sharing permission has been denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
                                 }catch{
-                                    print("❌ Unable to complete the request.")
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
                                 }
                                 
                             case .weight:
@@ -77,10 +81,12 @@ struct HealthDataListView: View {
                                     try await hkManager.fetchWeightForDifferentials()
                                     isShowingAddData = false
                                 }catch STError.sharingDenied(let quantityType){
-                                    print("❌ Sharing permission has been denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
                                 }catch{
-                                    print("❌ Unable to complete the request.")
-                                } 
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
+                                }
                             }
                         }
                     }
@@ -90,6 +96,20 @@ struct HealthDataListView: View {
                         isShowingAddData = false
                     }
                 }
+            }
+            .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
+                switch writeError {
+                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                    EmptyView()
+                case .sharingDenied(let quantityType):
+                    
+                    Button("Settings") {
+                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
+            } message: { writeError in
+                Text(writeError.failureReason)
             }
         }
     }
