@@ -59,11 +59,17 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
+                        guard let value = Double(addedValue) else {
+                            writeError = .invalidData
+                            isShowingAlert = true
+                            addedValue = ""
+                            return
+                        }
                         Task{
                             switch metric {
                             case .steps:
                                 do{
-                                    try await hkManager.addStepData(date: addedDate, value: Double(addedValue)!)
+                                    try await hkManager.addStepData(date: addedDate, value: value)
                                     try await hkManager.fetchStepCount()
                                     isShowingAddData = false
                                 }catch STError.sharingDenied(let quantityType){
@@ -76,7 +82,7 @@ struct HealthDataListView: View {
                                 
                             case .weight:
                                 do{
-                                    try await hkManager.addWeightData(date: addedDate, value: Double(addedValue)!)
+                                    try await hkManager.addWeightData(date: addedDate, value: value)
                                     try await hkManager.fetchWeight()
                                     try await hkManager.fetchWeightForDifferentials()
                                     isShowingAddData = false
@@ -99,9 +105,9 @@ struct HealthDataListView: View {
             }
             .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
                 switch writeError {
-                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                case .authNotDetermined, .noData, .unableToCompleteRequest, .invalidData:
                     EmptyView()
-                case .sharingDenied(let quantityType):
+                case .sharingDenied(_):
                     
                     Button("Settings") {
                         UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
