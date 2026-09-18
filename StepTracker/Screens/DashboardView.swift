@@ -85,7 +85,6 @@ struct DashboardView: View {
             } content: {
                 HealthkitPermissionPrimingView()
             }
-            
         }
         .tint(isSteps ? .pink : .indigo)
     }

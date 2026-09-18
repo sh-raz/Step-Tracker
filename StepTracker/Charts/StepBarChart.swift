@@ -47,42 +47,47 @@ struct StepBarChart: View {
             .padding(.bottom, 12)
             .foregroundStyle(Color.secondary)
             
-            Chart {
-                if let selectedHealthMetric {
-                    RuleMark(x: .value("Selected Health Metric", selectedHealthMetric.date, unit: .day))
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                        .offset(y: -10)
-                        .annotation(position: .top,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                            annotationView                                   }
+            if chartData.isEmpty {
+                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no step count data from the Health App.")
+                    .frame(height: 150)
+            }else{
+                Chart {
+                    if let selectedHealthMetric {
+                        RuleMark(x: .value("Selected Health Metric", selectedHealthMetric.date, unit: .day))
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .offset(y: -10)
+                            .annotation(position: .top,
+                                        spacing: 0,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                annotationView                                   }
+                    }
+                    
+                    RuleMark(y: .value("Average", avgSteps))
+                        .lineStyle(.init(lineWidth: 0.6, dash: [5]))
+                        .foregroundStyle(Color.secondary)
+                    
+                    ForEach(chartData) { step in
+                        BarMark(
+                            x: .value("Date", step.date, unit: .day),
+                            y: .value("Steps", step.value)
+                        )
+                        .foregroundStyle(Color.pink.gradient)
+                        .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)//?
+                    }
                 }
-                
-                RuleMark(y: .value("Average", avgSteps))
-                    .lineStyle(.init(lineWidth: 0.6, dash: [5]))
-                    .foregroundStyle(Color.secondary)
-                
-                ForEach(chartData) { step in
-                    BarMark(
-                        x: .value("Date", step.date, unit: .day),
-                        y: .value("Steps", step.value)
-                    )
-                    .foregroundStyle(Color.pink.gradient)
-                    .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)//?
+                .frame(height: 150)
+                .chartXSelection(value: $selectedDate.animation(.easeInOut))
+                .chartXAxis {
+                    AxisMarks{
+                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                    }
                 }
-            }
-            .frame(height: 150)
-            .chartXSelection(value: $selectedDate.animation(.easeInOut))
-            .chartXAxis {
-                AxisMarks{
-                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                }
-            }
-            .chartYAxis{
-                AxisMarks { value in
-                    AxisGridLine()
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                    AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                .chartYAxis{
+                    AxisMarks { value in
+                        AxisGridLine()
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                        AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                    }
                 }
             }
         }
