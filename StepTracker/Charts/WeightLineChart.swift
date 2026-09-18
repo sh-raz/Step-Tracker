@@ -10,6 +10,7 @@ import Charts
 
 struct WeightLineChart: View {
     @State private var selectedDate: Date?
+    @State private var selectedDay: Date?
     
     var selectedStat: HealthMetricContext
     var chartData: [HealthMetric]
@@ -43,17 +44,21 @@ struct WeightLineChart: View {
             .padding(.bottom, 12)
             .foregroundStyle(Color.secondary)
             
-            Chart {
-                if let selectedMetric {
-                    RuleMark(x: .value("Selected Health Metric", selectedMetric.date, unit: .day))
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                        .offset(y: -10)
-                        .annotation(position: .top,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                            annotationView
-                        }
-                }
+            if chartData.isEmpty {
+                EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
+                    .frame(height: 150)
+            }else{
+                Chart {
+                    if let selectedMetric {
+                        RuleMark(x: .value("Selected Health Metric", selectedMetric.date, unit: .day))
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .offset(y: -10)
+                            .annotation(position: .top,
+                                        spacing: 0,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                annotationView
+                            }
+                    }
                     RuleMark(y: .value("Goal", 155))
                         .foregroundStyle(.mint)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
@@ -76,28 +81,36 @@ struct WeightLineChart: View {
                         .symbol(.circle)
                     }
                 }
-                    .frame(height: 150)
-                    .chartYScale(domain: .automatic(includesZero: false))
-                    .chartXAxis {
-                        AxisMarks{
-                            AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                        }
+                .frame(height: 150)
+                .chartYScale(domain: .automatic(includesZero: false))
+                .chartXAxis {
+                    AxisMarks{
+                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
                     }
-                    .chartYAxis {
-                        AxisMarks{
-                            AxisGridLine()
-                                .foregroundStyle(Color.secondary.opacity(0.3))
-                            AxisValueLabel()
-                        }
+                }
+                .chartYAxis {
+                    AxisMarks{
+                        AxisGridLine()
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                        AxisValueLabel()
                     }
-                    .chartXSelection(value: $selectedDate)
-            }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color(.secondarySystemBackground))
+                }
+                .chartXSelection(value: $selectedDate)
             }
         }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color(.secondarySystemBackground))
+        }
+        .onChange(of: selectedDate) { oldValue, newValue in
+            guard let old = oldValue, let new = newValue else { return }
+            if !Calendar.current.isDate(old, inSameDayAs: new){
+                selectedDay = new
+            }
+        }
+    }
+    
     
     var annotationView: some View {
         VStack{
@@ -114,10 +127,9 @@ struct WeightLineChart: View {
             .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
         )
     }
-    
 }
 
 
-    #Preview {
-        WeightLineChart(selectedStat: .weight, chartData: MockData.weights)
-    }
+#Preview {
+    WeightLineChart(selectedStat: .weight, chartData: MockData.weights)
+}

@@ -10,6 +10,7 @@ import Charts
 
 struct WeightBarChart: View {
     @State private var selectedWeekday: Date?
+    @State private var selectedDay: Date?
     
     var chartData: [WeekdayDataType]
     
@@ -35,46 +36,57 @@ struct WeightBarChart: View {
             .padding(.bottom, 12)
             .foregroundStyle(Color.secondary)
             
-            Chart {
-                if let selectedData {
-                    RuleMark(x: .value("Selected Weekday", selectedData.date, unit: .day))
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                        .annotation(position: .top,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                            annotationView
-                        }
+            if chartData.isEmpty {
+                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
+                    .frame(height: 200)
+            }else{
+                Chart {
+                    if let selectedData {
+                        RuleMark(x: .value("Selected Weekday", selectedData.date, unit: .day))
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .annotation(position: .top,
+                                        spacing: 0,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                annotationView
+                            }
+                    }
+                    ForEach(chartData) { averageData in
+                        BarMark(
+                            x: .value("Date", averageData.date, unit: .day),
+                            y: .value("Weights", averageData.value)
+                        )
+                        .foregroundStyle(averageData.value >= 0 ? Color.indigo.gradient : Color.mint.gradient)
+                    }
                 }
-                ForEach(chartData) { averageData in
-                    BarMark(
-                        x: .value("Date", averageData.date, unit: .day),
-                        y: .value("Weights", averageData.value)
-                    )
-                    .foregroundStyle(averageData.value >= 0 ? Color.indigo.gradient : Color.mint.gradient)
-                    
+                .frame(height: 240)
+                .chartYScale(domain: .automatic(includesZero: true))
+                
+                .chartXAxis {
+                    AxisMarks(values: AxisMarkValues.stride(by: .day)) {
+                        AxisValueLabel(format: .dateTime.weekday(.abbreviated),centered: true)
+                    }
                 }
+                .chartYAxis {
+                    AxisMarks{
+                        AxisGridLine()
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                        AxisValueLabel()
+                    }
+                }
+                .chartXSelection(value: $selectedWeekday)
             }
-            .frame(height: 240)
-            .chartYScale(domain: .automatic(includesZero: true))
-            
-            .chartXAxis {
-                AxisMarks(values: AxisMarkValues.stride(by: .day)) {
-                    AxisValueLabel(format: .dateTime.weekday(.abbreviated),centered: true)
-                }
-            }
-            .chartYAxis {
-                AxisMarks{
-                    AxisGridLine()
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                    AxisValueLabel()
-                }
-            }
-            .chartXSelection(value: $selectedWeekday)
         }
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.secondarySystemBackground))
+        }
+        .sensoryFeedback(.selection, trigger: selectedDay)
+        .onChange(of: selectedWeekday) { oldValue, newValue in
+            guard let old = oldValue, let new = newValue else { return }
+            if !Calendar.current.isDate(old, inSameDayAs: new){
+                selectedDay = new
+            }
         }
     }
     

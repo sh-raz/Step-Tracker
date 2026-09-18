@@ -25,9 +25,10 @@ enum HealthMetricContext: CaseIterable, Identifiable{
 struct DashboardView: View {
     
     @Environment(HealthKitManager.self) private var hkManager
-    @AppStorage("hasSeenPermissionPriming") private var hasSeenPermissionPriming = false
     @State private var selectedStat: HealthMetricContext = .steps
     @State private var isShowingPermissionPrimingSheet = false
+    @State private var isShowingAlert = false
+    @State private var fetchError: STError = .noData
     
     var isSteps: Bool { selectedStat == .steps}
     
@@ -56,19 +57,33 @@ struct DashboardView: View {
             }
             .padding()
             .task {
-                await hkManager.fetchStepCount()
-                await hkManager.fetchWeight()
-                await hkManager.fetchWeightForDifferentials()
-                isShowingPermissionPrimingSheet = !hasSeenPermissionPriming
+                do{
+                    try await hkManager.fetchStepCount()
+                    try await hkManager.fetchWeight()
+                    try await hkManager.fetchWeightForDifferentials()
+                }catch STError.authNotDetermined{
+                    isShowingPermissionPrimingSheet = true
+                }catch STError.noData{
+                    fetchError = .noData
+                    isShowingAlert = true
+                }catch{
+                    fetchError = .unableToCompleteRequest
+                    isShowingAlert = true
+                }
             }
             .navigationTitle("Dashboard")
             .navigationDestination(for: HealthMetricContext.self) { metric in
                 HealthDataListView(metric: metric)
             }
+            .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
+                //action
+            } message: { fetchError in
+                Text(fetchError.failureReason)
+            }
             .sheet(isPresented: $isShowingPermissionPrimingSheet) {
                 //fetch health data
             } content: {
-                HealthkitPermissionPrimingView(hasSeen: $hasSeenPermissionPriming)
+                HealthkitPermissionPrimingView()
             }
         }
         .tint(isSteps ? .pink : .indigo)
