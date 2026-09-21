@@ -27,7 +27,6 @@ struct MockData {
                                     value: .random(in: 160 + Double(i/3)...165 + Double(i/3)))
             weights.append(weight)
         }
-        print(" 😳 ")
         return weights
     }
 }

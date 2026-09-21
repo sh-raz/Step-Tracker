@@ -12,52 +12,31 @@ struct WeightLineChart: View {
     @State private var selectedDate: Date?
     @State private var selectedDay: Date?
     
-    var selectedStat: HealthMetricContext
-    var chartData: [HealthMetric]
+    
+    var chartData: [ChartDataModel]
     var minWeight: Double {
         return chartData.min{ $0.value < $1.value }?.value ?? 0
     }
     
-    var selectedMetric: HealthMetric? {
-        guard let selectedDate else {return nil}
-        return chartData.first {
-            Calendar.current.isDate(selectedDate, inSameDayAs: $0.date)
-        }
+    var selectedData: ChartDataModel? {
+        ChartHelper.selectedData(from: chartData, in: selectedDate)
     }
     
     
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedStat) {
-                HStack {
-                    VStack(alignment: .leading){
-                        Label("Weights", systemImage: "figure")
-                            .font(.title3.bold())
-                            .foregroundStyle(Color.indigo)
-                        Text("Avg:  pounds")
-                            .font(.caption)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.forward")
-                }
-            }
-            .padding(.bottom, 12)
-            .foregroundStyle(Color.secondary)
-            
+        let config = ChartContainerConfiguration(title: "Weights",
+                                                 imageName: "figure",
+                                                 description: "Avg:  pounds",
+                                                 context: .weight,
+                                                 isNav: true)
+        ChartContainer(config: config) {
             if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
                     .frame(height: 150)
             }else{
                 Chart {
-                    if let selectedMetric {
-                        RuleMark(x: .value("Selected Health Metric", selectedMetric.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(position: .top,
-                                        spacing: 0,
-                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                annotationView
-                            }
+                    if let selectedData {
+                        ChartAnnotationView(selectedData: selectedData, context: .weight)
                     }
                     RuleMark(y: .value("Goal", 155))
                         .foregroundStyle(.mint)
@@ -98,11 +77,6 @@ struct WeightLineChart: View {
                 .chartXSelection(value: $selectedDate)
             }
         }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
-        }
         .onChange(of: selectedDate) { oldValue, newValue in
             guard let old = oldValue, let new = newValue else { return }
             if !Calendar.current.isDate(old, inSameDayAs: new){
@@ -110,26 +84,9 @@ struct WeightLineChart: View {
             }
         }
     }
-    
-    
-    var annotationView: some View {
-        VStack{
-            Text(selectedMetric?.date ?? .now, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(.footnote.bold())
-                .foregroundStyle(Color.secondary)
-            Text(selectedMetric?.value ?? 0, format: .number.precision(.fractionLength(1)))
-                .foregroundStyle(Color.indigo)
-                .fontWeight(.heavy)
-        }
-        .padding(15)
-        .background(RoundedRectangle(cornerRadius: 10)
-            .fill(Color(.secondarySystemBackground))
-            .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
-        )
-    }
 }
 
 
 #Preview {
-    WeightLineChart(selectedStat: .weight, chartData: MockData.weights)
+    WeightLineChart(chartData: ChartHelper.converToChartData(data: MockData.weights))
 }
