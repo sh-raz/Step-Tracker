@@ -9,46 +9,30 @@ import SwiftUI
 import Charts
 
 struct WeightBarChart: View {
-    @State private var selectedWeekday: Date?
+    @State private var selectedDate: Date?
     @State private var selectedDay: Date?
     
-    var chartData: [WeekdayDataType]
+    var chartData: [ChartDataModel]
     
-    var selectedData: WeekdayDataType? {
-        guard let selectedWeekday else {return nil}
-        return chartData.first {
-            $0.date.weekdayInt == selectedWeekday.weekdayInt
-        }
+    var selectedData: ChartDataModel? {
+        ChartHelper.selectedData(from: chartData, in: selectedDate)
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                VStack(alignment: .leading){
-                    Label("Average Weight Change", systemImage: "figure")
-                        .font(.title3.bold())
-                        .foregroundStyle(Color.indigo)
-                    Text("Per Weekday (Last 28 Days)")
-                        .font(.caption)
-                }
-                Spacer()
-            }
-            .padding(.bottom, 12)
-            .foregroundStyle(Color.secondary)
-            
+        let config = ChartContainerConfiguration(title: "Average Weight Change",
+                                                 imageName: "figure",
+                                                 description: "Per Weekday (Last 28 Days)",
+                                                 context: .weight,
+                                                 isNav: false)
+        
+        ChartContainer(config: config) {
             if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
                     .frame(height: 200)
             }else{
                 Chart {
                     if let selectedData {
-                        RuleMark(x: .value("Selected Weekday", selectedData.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .annotation(position: .top,
-                                        spacing: 0,
-                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                annotationView
-                            }
+                        ChartAnnotationView(selectedData: selectedData, context: .weight)
                     }
                     ForEach(chartData) { averageData in
                         BarMark(
@@ -73,37 +57,15 @@ struct WeightBarChart: View {
                         AxisValueLabel()
                     }
                 }
-                .chartXSelection(value: $selectedWeekday)
+                .chartXSelection(value: $selectedDate)
             }
-        }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
         }
         .sensoryFeedback(.selection, trigger: selectedDay)
-        .onChange(of: selectedWeekday) { oldValue, newValue in
-            guard let old = oldValue, let new = newValue else { return }
-            if !Calendar.current.isDate(old, inSameDayAs: new){
-                selectedDay = new
+        .onChange(of: selectedDate) { oldValue, newValue in
+            if oldValue?.weekdayInt != newValue?.weekdayInt {
+                selectedDay = newValue
             }
         }
-    }
-    
-    var annotationView: some View {
-        VStack{
-            Text(selectedData?.date ?? .now, format: .dateTime.weekday(.wide))
-                .font(.footnote.bold())
-                .foregroundStyle(Color.secondary)
-            Text(selectedData?.value ?? 0, format: .number.precision(.fractionLength(2)).sign(strategy: .always()))
-                .foregroundStyle((selectedData?.value ?? 0) >= 0 ? Color.indigo : Color.mint)
-                .fontWeight(.heavy)
-        }
-        .padding(15)
-        .background(RoundedRectangle(cornerRadius: 10)
-            .fill(Color(.secondarySystemBackground))
-            .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
-        )
     }
 }
 

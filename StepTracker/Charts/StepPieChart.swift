@@ -10,37 +10,29 @@ import Charts
 
 struct StepPieChart: View {
     
-    var pieChartData: [WeekdayDataType]
+    var chartData: [ChartDataModel]
     @State private var selectedWeekdayValue: Double? = 0
     @State private var selectedDay: Date?
     
-    var selectedWeekday: WeekdayDataType? {
+    var selectedWeekday: ChartDataModel? {
         guard let selectedWeekdayValue else { return nil }
         var total = 0.0
-        return pieChartData.first{
+        return chartData.first{
             total += $0.value
             return selectedWeekdayValue <= total
         }
     }
     
     var body: some View {
+        let config = ChartContainerConfiguration(title: "Averages", imageName: "calendar", description: "Last 28 days", context: .steps, isNav: false)
         
-        VStack(alignment: .leading){
-            VStack(alignment: .leading){
-                Label("Averages", systemImage: "calendar")
-                    .font(.title3.bold())
-                    .foregroundStyle(Color.pink)
-                Text("Last 28 days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 12)
-            if pieChartData.isEmpty {
+        ChartContainer(config: config) {
+            if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.pie", title: "No Data", description: "There is no step count data from the Health App.")
                     .frame(height: 200)
             }else{
                 Chart{
-                    ForEach(pieChartData) { weekdayData in
+                    ForEach(chartData) { weekdayData in
                         SectorMark(angle: .value("Average for day", weekdayData.value),
                                    innerRadius: .ratio(0.618),
                                    outerRadius: (selectedWeekday?.date.weekdayInt == weekdayData.date.weekdayInt ? 140 : 110),
@@ -61,7 +53,7 @@ struct StepPieChart: View {
                                     Text(selectedWeekday.date, format: .dateTime.weekday(.wide))
                                         .font(.title3.bold())
                                         .contentTransition(.identity)
-                                        
+                                    
                                     Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
                                         .fontWeight(.medium)
                                         .foregroundStyle(.secondary)
@@ -74,11 +66,6 @@ struct StepPieChart: View {
                 }
             }
         }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
-        }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedWeekday) { oldValue, newValue in
             guard let oldValue, let newValue else { return }
@@ -90,5 +77,5 @@ struct StepPieChart: View {
 }
 
 #Preview {
-    StepPieChart(pieChartData: ChartMath.averagePerWeek(for: HealthMetric.dataForPreview))
+    StepPieChart(chartData: ChartMath.averagePerWeek(for: MockData.steps))
 }
