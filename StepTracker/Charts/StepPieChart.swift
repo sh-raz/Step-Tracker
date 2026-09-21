@@ -10,14 +10,14 @@ import Charts
 
 struct StepPieChart: View {
     
-    var pieChartData: [WeekdayDataType]
+    var chartData: [ChartDataModel]
     @State private var selectedWeekdayValue: Double? = 0
     @State private var selectedDay: Date?
     
-    var selectedWeekday: WeekdayDataType? {
+    var selectedWeekday: ChartDataModel? {
         guard let selectedWeekdayValue else { return nil }
         var total = 0.0
-        return pieChartData.first{
+        return chartData.first{
             total += $0.value
             return selectedWeekdayValue <= total
         }
@@ -26,12 +26,12 @@ struct StepPieChart: View {
     var body: some View {
         ChartContainer(title: "Averages", imageName: "calendar", description: "Last 28 days", context: .steps, isNav: false) {
             
-            if pieChartData.isEmpty {
+            if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.pie", title: "No Data", description: "There is no step count data from the Health App.")
                     .frame(height: 200)
             }else{
                 Chart{
-                    ForEach(pieChartData) { weekdayData in
+                    ForEach(chartData) { weekdayData in
                         SectorMark(angle: .value("Average for day", weekdayData.value),
                                    innerRadius: .ratio(0.618),
                                    outerRadius: (selectedWeekday?.date.weekdayInt == weekdayData.date.weekdayInt ? 140 : 110),
@@ -76,5 +76,5 @@ struct StepPieChart: View {
 }
 
 #Preview {
-    StepPieChart(pieChartData: ChartMath.averagePerWeek(for: HealthMetric.dataForPreview))
+    StepPieChart(chartData: ChartMath.averagePerWeek(for: MockData.steps))
 }

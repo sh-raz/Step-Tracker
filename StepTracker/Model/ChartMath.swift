@@ -10,8 +10,8 @@ import Algorithms
 
 struct ChartMath {
     
-   static func averagePerWeek(for metrics: [HealthMetric]) -> [WeekdayDataType] {
-        var stepPerWeekday: [WeekdayDataType] = []
+   static func averagePerWeek(for metrics: [HealthMetric]) -> [ChartDataModel] {
+        var stepPerWeekday: [ChartDataModel] = []
         let sortedMetrics = metrics.sorted{ $0.date.weekdayInt < $1.date.weekdayInt }
         let weekdayArrays = sortedMetrics.chunked{ $0.date.weekdayInt == $1.date.weekdayInt }
                 
@@ -25,7 +25,7 @@ struct ChartMath {
     }
     
     
-    static func averageDailyWeightDiffs(for weights: [HealthMetric]) -> [WeekdayDataType] {
+    static func averageDailyWeightDiffs(for weights: [HealthMetric]) -> [ChartDataModel] {
         var diffArray: [(date: Date, diff: Double)] = []
         
         guard weights.count > 1 else { return [] }
@@ -36,8 +36,8 @@ struct ChartMath {
         }
         let sortedDiffs = diffArray.sorted{ $0.date.weekdayInt < $1.date.weekdayInt }
         let diffArrays = sortedDiffs.chunked { $0.date.weekdayInt == $1.date.weekdayInt}
-        var weekdayChartData: [WeekdayDataType] = []
-        //Sheep sheep is the best 🌷🌹💐🏵️
+        var weekdayChartData: [ChartDataModel] = []
+       
         for array in diffArrays {
             guard let firstElement = array.first else { continue }
             let total = array.reduce(0) { $0 + $1.diff }

@@ -10,23 +10,18 @@ import Charts
 
 struct StepBarChart: View {
     
-    var chartData: [HealthMetric]
-    var selectedStat: HealthMetricContext
+    var chartData: [ChartDataModel]
     @State private var selectedDate: Date?
     @State private var selectedDay: Date?
-
+    
+    var selectedData: ChartDataModel? {
+        ChartHelper.selectedData(from: chartData, in: selectedDate)
+    }
     
     var avgSteps: Double {
         guard !chartData.isEmpty else {return 0}
         let total = chartData.reduce(0) { $0 + $1.value }
         return total / Double(chartData.count)
-    }
-    
-    var selectedHealthMetric: HealthMetric? {
-        guard let selectedDate else {return nil}
-        return chartData.first {
-            Calendar.current.isDate(selectedDate, inSameDayAs: $0.date)
-        }
     }
     
     var body: some View {
@@ -36,16 +31,16 @@ struct StepBarChart: View {
                     .frame(height: 150)
             }else{
                 Chart {
-                    if let selectedHealthMetric {
-                        RuleMark(x: .value("Selected Health Metric", selectedHealthMetric.date, unit: .day))
+                    if let selectedData {
+                        RuleMark(x: .value("Selected Health Metric", selectedData.date, unit: .day))
                             .foregroundStyle(Color.secondary.opacity(0.3))
                             .offset(y: -10)
                             .annotation(position: .top,
                                         spacing: 0,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                annotationView                                   }
+                                ChartAnnotationView(selectedData: selectedData, context: .steps)
+                            }
                     }
-                    
                     RuleMark(y: .value("Average", avgSteps))
                         .lineStyle(.init(lineWidth: 0.6, dash: [5]))
                         .foregroundStyle(Color.secondary)
@@ -56,7 +51,7 @@ struct StepBarChart: View {
                             y: .value("Steps", step.value)
                         )
                         .foregroundStyle(Color.pink.gradient)
-                        .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)
+                        .opacity(selectedDate == nil || selectedData?.date == step.date ? 1.0 : 0.3)
                     }
                 }
                 .frame(height: 150)
@@ -83,26 +78,8 @@ struct StepBarChart: View {
             }
         }
     }
-   
-    
-    
-    var annotationView: some View {
-        VStack{
-            Text(selectedHealthMetric?.date ?? .now, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(.footnote.bold())
-                .foregroundStyle(Color.secondary)
-            Text(selectedHealthMetric?.value ?? 0, format: .number.precision(.fractionLength(0)))
-                .foregroundStyle(Color.pink)
-                .fontWeight(.heavy)
-        }
-        .padding(15)
-        .background(RoundedRectangle(cornerRadius: 10)
-            .fill(Color(.secondarySystemBackground))
-            .shadow(color: Color.secondary.opacity(0.3), radius: 2, x: 2, y: 2)
-        )
-    }
 }
 
 #Preview {
-    StepBarChart(chartData: HealthMetric.dataForPreview, selectedStat: .steps)
+    StepBarChart(chartData: ChartHelper.converToChartData(data: MockData.steps))
 }
