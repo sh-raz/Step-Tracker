@@ -30,23 +30,7 @@ struct StepBarChart: View {
     }
     
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedStat) {
-                HStack {
-                    VStack(alignment: .leading){
-                        Label("Steps", systemImage: "figure.walk")
-                            .font(.title3.bold())
-                            .foregroundStyle(Color.pink)
-                        Text("Avg: \(Int(avgSteps)) Steps")
-                            .font(.caption)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.forward")
-                }
-            }
-            .padding(.bottom, 12)
-            .foregroundStyle(Color.secondary)
-            
+        ChartContainer(title: "Steps", imageName: "figure.walk", description: "Avg: \(Int(avgSteps)) Steps", context: .steps, isNav: true) {
             if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no step count data from the Health App.")
                     .frame(height: 150)
@@ -72,7 +56,7 @@ struct StepBarChart: View {
                             y: .value("Steps", step.value)
                         )
                         .foregroundStyle(Color.pink.gradient)
-                        .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)//?
+                        .opacity(selectedDate == nil || selectedHealthMetric?.date == step.date ? 1.0 : 0.3)
                     }
                 }
                 .frame(height: 150)
@@ -91,11 +75,6 @@ struct StepBarChart: View {
                 }
             }
         }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
-        }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedDate) { oldValue, newValue in
             guard let old = oldValue, let new = newValue else { return }
@@ -105,6 +84,7 @@ struct StepBarChart: View {
         }
     }
    
+    
     
     var annotationView: some View {
         VStack{

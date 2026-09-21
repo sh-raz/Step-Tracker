@@ -27,23 +27,8 @@ struct WeightLineChart: View {
     
     
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedStat) {
-                HStack {
-                    VStack(alignment: .leading){
-                        Label("Weights", systemImage: "figure")
-                            .font(.title3.bold())
-                            .foregroundStyle(Color.indigo)
-                        Text("Avg:  pounds")
-                            .font(.caption)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.forward")
-                }
-            }
-            .padding(.bottom, 12)
-            .foregroundStyle(Color.secondary)
-            
+        ChartContainer(title: "Weights", imageName: "figure", description: "Avg:  pounds", context: .weight, isNav: true) {
+        
             if chartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
                     .frame(height: 150)
@@ -97,11 +82,6 @@ struct WeightLineChart: View {
                 }
                 .chartXSelection(value: $selectedDate)
             }
-        }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
         }
         .onChange(of: selectedDate) { oldValue, newValue in
             guard let old = oldValue, let new = newValue else { return }

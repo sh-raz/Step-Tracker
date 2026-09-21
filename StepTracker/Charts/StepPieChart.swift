@@ -24,17 +24,8 @@ struct StepPieChart: View {
     }
     
     var body: some View {
-        
-        VStack(alignment: .leading){
-            VStack(alignment: .leading){
-                Label("Averages", systemImage: "calendar")
-                    .font(.title3.bold())
-                    .foregroundStyle(Color.pink)
-                Text("Last 28 days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 12)
+        ChartContainer(title: "Averages", imageName: "calendar", description: "Last 28 days", context: .steps, isNav: false) {
+            
             if pieChartData.isEmpty {
                 EmptyChartView(systemImageName: "chart.pie", title: "No Data", description: "There is no step count data from the Health App.")
                     .frame(height: 200)
@@ -61,7 +52,7 @@ struct StepPieChart: View {
                                     Text(selectedWeekday.date, format: .dateTime.weekday(.wide))
                                         .font(.title3.bold())
                                         .contentTransition(.identity)
-                                        
+                                    
                                     Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
                                         .fontWeight(.medium)
                                         .foregroundStyle(.secondary)
@@ -73,11 +64,6 @@ struct StepPieChart: View {
                     }
                 }
             }
-        }
-        .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(.secondarySystemBackground))
         }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedWeekday) { oldValue, newValue in
