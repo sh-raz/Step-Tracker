@@ -12,7 +12,7 @@ struct ChartMath {
     
    static func averagePerWeek(for metrics: [HealthMetric]) -> [ChartDataModel] {
         var stepPerWeekday: [ChartDataModel] = []
-        let sortedMetrics = metrics.sorted{ $0.date.weekdayInt < $1.date.weekdayInt }
+       let sortedMetrics = metrics.sorted(using: KeyPathComparator(\.date.weekdayInt))
         let weekdayArrays = sortedMetrics.chunked{ $0.date.weekdayInt == $1.date.weekdayInt }
                 
         for array in weekdayArrays {
@@ -34,7 +34,7 @@ struct ChartMath {
                 let diff = weights[i].value - weights[i-1].value
                 diffArray.append((date: date, diff: diff))
         }
-        let sortedDiffs = diffArray.sorted{ $0.date.weekdayInt < $1.date.weekdayInt }
+        let sortedDiffs = diffArray.sorted(using: KeyPathComparator(\.date.weekdayInt))
         let diffArrays = sortedDiffs.chunked { $0.date.weekdayInt == $1.date.weekdayInt}
         var weekdayChartData: [ChartDataModel] = []
        

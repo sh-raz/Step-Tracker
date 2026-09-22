@@ -18,31 +18,28 @@ struct StepBarChart: View {
         ChartHelper.selectedData(from: chartData, in: selectedDate)
     }
     
-    var avgSteps: Double {
-        guard !chartData.isEmpty else {return 0}
-        let total = chartData.reduce(0) { $0 + $1.value }
-        return total / Double(chartData.count)
+    var avgSteps: Int {
+        Int(chartData.map{$0.value}.average)
     }
     
     var body: some View {
         let config = ChartContainerConfiguration(title: "Steps",
                                                  imageName: "figure.walk",
-                                                 description: "Avg: \(Int(avgSteps)) Steps",
+                                                 description: "Avg: \(avgSteps.formatted() )) Steps",
                                                  context: .steps,
                                                  isNav: true)
         
         ChartContainer(config: config) {
-            if chartData.isEmpty {
-                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no step count data from the Health App.")
-                    .frame(height: 150)
-            }else{
                 Chart {
                     if let selectedData {
                         ChartAnnotationView(selectedData: selectedData, context: .steps)
                     }
-                    RuleMark(y: .value("Average", avgSteps))
-                        .lineStyle(.init(lineWidth: 0.6, dash: [5]))
-                        .foregroundStyle(Color.secondary)
+                    
+                    if !chartData.isEmpty {
+                        RuleMark(y: .value("Average", avgSteps ))
+                            .lineStyle(.init(lineWidth: 0.6, dash: [5]))
+                            .foregroundStyle(Color.secondary)
+                    }
                     
                     ForEach(chartData) { step in
                         BarMark(
@@ -67,7 +64,12 @@ struct StepBarChart: View {
                         AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
                     }
                 }
-            }
+                .overlay {
+                    if chartData.isEmpty {
+                        EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no step count data from the Health App.")
+                            .frame(height: 150)
+                    }
+                }
         }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedDate) { oldValue, newValue in
@@ -80,5 +82,5 @@ struct StepBarChart: View {
 }
 
 #Preview {
-    StepBarChart(chartData: ChartHelper.converToChartData(data: MockData.steps))
+    StepBarChart(chartData: [])
 }

@@ -22,59 +22,65 @@ struct WeightLineChart: View {
         ChartHelper.selectedData(from: chartData, in: selectedDate)
     }
     
+    var avgWeight: Double {
+        chartData.map{$0.value}.average
+    }
+    
+    
     
     var body: some View {
         let config = ChartContainerConfiguration(title: "Weights",
                                                  imageName: "figure",
-                                                 description: "Avg:  pounds",
+                                                 description: "Avg: \(avgWeight.formatted(.number.precision(.fractionLength(1)))) pounds",
                                                  context: .weight,
                                                  isNav: true)
         ChartContainer(config: config) {
-            if chartData.isEmpty {
-                EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
-                    .frame(height: 150)
-            }else{
-                Chart {
-                    if let selectedData {
-                        ChartAnnotationView(selectedData: selectedData, context: .weight)
-                    }
-                    RuleMark(y: .value("Goal", 155))
-                        .foregroundStyle(.mint)
-                        .lineStyle(.init(lineWidth: 1, dash: [5]))
+            Chart {
+                if let selectedData {
+                    ChartAnnotationView(selectedData: selectedData, context: .weight)
+                }
+                RuleMark(y: .value("Goal", 155))
+                    .foregroundStyle(.mint)
+                    .lineStyle(.init(lineWidth: 1, dash: [5]))
+                
+                ForEach(chartData) { weight in
+                    AreaMark(
+                        x: .value("Date", weight.date, unit: .day),
+                        yStart: .value("Weight", weight.value),
+                        yEnd: .value("Min value", minWeight)
+                    )
+                    .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
+                    .interpolationMethod(.catmullRom)
                     
-                    ForEach(chartData) { weight in
-                        AreaMark(
-                            x: .value("Date", weight.date, unit: .day),
-                            yStart: .value("Weight", weight.value),
-                            yEnd: .value("Min value", minWeight)
-                        )
-                        .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
-                        .interpolationMethod(.catmullRom)
-                        
-                        LineMark(
-                            x: .value("Date", weight.date, unit: .day),
-                            y: .value("Weights", weight.value)
-                        )
-                        .foregroundStyle(.indigo)
-                        .interpolationMethod(.catmullRom)
-                        .symbol(.circle)
-                    }
+                    LineMark(
+                        x: .value("Date", weight.date, unit: .day),
+                        y: .value("Weights", weight.value)
+                    )
+                    .foregroundStyle(.indigo)
+                    .interpolationMethod(.catmullRom)
+                    .symbol(.circle)
                 }
-                .frame(height: 150)
-                .chartYScale(domain: .automatic(includesZero: false))
-                .chartXAxis {
-                    AxisMarks{
-                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                    }
+            }
+            .frame(height: 150)
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis {
+                AxisMarks{
+                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
                 }
-                .chartYAxis {
-                    AxisMarks{
-                        AxisGridLine()
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                        AxisValueLabel()
-                    }
+            }
+            .chartYAxis {
+                AxisMarks{
+                    AxisGridLine()
+                        .foregroundStyle(Color.secondary.opacity(0.3))
+                    AxisValueLabel()
                 }
-                .chartXSelection(value: $selectedDate)
+            }
+            .chartXSelection(value: $selectedDate)
+            .overlay {
+                if chartData.isEmpty {
+                    EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
+                        .frame(height: 150)
+                }
             }
         }
         .onChange(of: selectedDate) { oldValue, newValue in

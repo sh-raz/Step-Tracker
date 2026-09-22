@@ -67,7 +67,7 @@ struct DashboardView: View {
             } message: { fetchError in
                 Text(fetchError.failureReason)
             }
-            .sheet(isPresented: $isShowingPermissionPrimingSheet) {
+            .fullScreenCover(isPresented: $isShowingPermissionPrimingSheet) {
                 fetchHealthData()
             } content: {
                 HealthkitPermissionPrimingView()

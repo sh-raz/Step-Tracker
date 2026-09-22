@@ -26,10 +26,6 @@ struct WeightBarChart: View {
                                                  isNav: false)
         
         ChartContainer(config: config) {
-            if chartData.isEmpty {
-                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
-                    .frame(height: 200)
-            }else{
                 Chart {
                     if let selectedData {
                         ChartAnnotationView(selectedData: selectedData, context: .weight)
@@ -59,11 +55,16 @@ struct WeightBarChart: View {
                 }
                 .chartXSelection(value: $selectedDate)
             }
-        }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedDate) { oldValue, newValue in
             if oldValue?.weekdayInt != newValue?.weekdayInt {
                 selectedDay = newValue
+            }
+        }
+        .overlay {
+            if chartData.isEmpty {
+                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
+                    .frame(height: 200)
             }
         }
     }
