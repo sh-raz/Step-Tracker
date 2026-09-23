@@ -37,8 +37,8 @@
 		4D9003F1303F421400565EEA = {
 			isa = PBXGroup;
 			children = (
-				4D9003FC303F421400565EEA /* StepTracker */,
 				4D9003FB303F421400565EEA /* Products */,
+				4D9003FC303F421400565EEA /* StepTracker */,
 			);
 			sourceTree = "<group>";
 		};
