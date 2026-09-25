@@ -68,4 +68,17 @@ enum ChartType {
             "Per Weekday (Last 28 Days)"
         }
     }
+    
+    var accesibilityLabel: String {
+        switch self {
+        case .StepBar(let average):
+            "Bar chart, step count, last 28 days, average steps per day: \(average) steps"
+        case .StepPie:
+            "Pie Chart, average steps per weekday"
+        case .WeightLine(let average):
+            "Line Chart, weight, avgerage weight: \(average.formatted(.number.precision(.fractionLength(1)))) pounds, goal weight: 155 pounds"
+        case .WeightDiffBar:
+            "Bar Chart, average weight difference per weekday"
+        }
+    }
 }

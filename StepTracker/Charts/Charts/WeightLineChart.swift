@@ -37,23 +37,28 @@ struct WeightLineChart: View {
                 RuleMark(y: .value("Goal", 155))
                     .foregroundStyle(.mint)
                     .lineStyle(.init(lineWidth: 1, dash: [5]))
+                    .accessibilityHidden(true)
                 
                 ForEach(chartData) { weight in
-                    AreaMark(
-                        x: .value("Date", weight.date, unit: .day),
-                        yStart: .value("Weight", weight.value),
-                        yEnd: .value("Min value", minWeight)
-                    )
-                    .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
-                    .interpolationMethod(.catmullRom)
-                    
-                    LineMark(
-                        x: .value("Date", weight.date, unit: .day),
-                        y: .value("Weights", weight.value)
-                    )
-                    .foregroundStyle(.indigo)
-                    .interpolationMethod(.catmullRom)
-                    .symbol(.circle)
+                    Plot{
+                        AreaMark(
+                            x: .value("Date", weight.date, unit: .day),
+                            yStart: .value("Weight", weight.value),
+                            yEnd: .value("Min value", minWeight)
+                        )
+                        .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
+                        .interpolationMethod(.catmullRom)
+                        
+                        LineMark(
+                            x: .value("Date", weight.date, unit: .day),
+                            y: .value("Weights", weight.value)
+                        )
+                        .foregroundStyle(.indigo)
+                        .interpolationMethod(.catmullRom)
+                        .symbol(.circle)
+                    }
+                    .accessibilityLabel(weight.date.accesibilityDate)
+                    .accessibilityValue(weight.value.formatted(.number.precision(.fractionLength(1))))
                 }
             }
             .frame(height: 150)
@@ -84,6 +89,7 @@ struct WeightLineChart: View {
                 selectedDay = new
             }
         }
+        .accessibilityLabel(ChartType.WeightLine(average: avgWeight).accesibilityLabel)
     }
 }
 

@@ -33,15 +33,20 @@ struct StepBarChart: View {
                         RuleMark(y: .value("Average", avgSteps ))
                             .lineStyle(.init(lineWidth: 0.6, dash: [5]))
                             .foregroundStyle(Color.secondary)
+                            .accessibilityHidden(true)
                     }
                     
                     ForEach(chartData) { step in
-                        BarMark(
-                            x: .value("Date", step.date, unit: .day),
-                            y: .value("Steps", step.value)
-                        )
-                        .foregroundStyle(Color.pink.gradient)
-                        .opacity(selectedDate == nil || selectedData?.date == step.date ? 1.0 : 0.3)
+                        Plot{
+                            BarMark(
+                                x: .value("Date", step.date, unit: .day),
+                                y: .value("Steps", step.value)
+                            )
+                            .foregroundStyle(Color.pink.gradient)
+                            .opacity(selectedDate == nil || selectedData?.date == step.date ? 1.0 : 0.3)
+                        }
+                        .accessibilityLabel(step.date.accesibilityDate)
+                        .accessibilityValue("\(Int(step.value)) steps")
                     }
                 }
                 .frame(height: 150)
@@ -72,6 +77,7 @@ struct StepBarChart: View {
                 selectedDay = new
             }
         }
+        .accessibilityLabel(ChartType.StepBar(average: avgSteps).accesibilityLabel)
     }
 }
 

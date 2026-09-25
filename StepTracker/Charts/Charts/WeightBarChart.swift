@@ -31,6 +31,8 @@ struct WeightBarChart: View {
                             y: .value("Weights", averageData.value)
                         )
                         .foregroundStyle(averageData.value >= 0 ? Color.indigo.gradient : Color.mint.gradient)
+                        .accessibilityLabel(averageData.date.weekdayTitle)
+                        .accessibilityValue("\(averageData.value.formatted(.number.precision(.fractionLength(1)).sign(strategy: .always()))) pounds")
                     }
                 }
                 .frame(height: 240)
@@ -62,6 +64,7 @@ struct WeightBarChart: View {
                     .frame(height: 200)
             }
         }
+        .accessibilityLabel(ChartType.WeightDiffBar.accesibilityLabel)
     }
 }
 

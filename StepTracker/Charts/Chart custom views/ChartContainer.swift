@@ -42,6 +42,7 @@ struct ChartContainer<Content: View>: View {
         }
         .padding(.bottom, 12)
         .foregroundStyle(Color.secondary)
+        .accessibilityHint("Tap to show data in list")
     }
     
     
@@ -54,6 +55,9 @@ struct ChartContainer<Content: View>: View {
                 .font(.caption)
                 .foregroundStyle(Color.secondary)
         }
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityLabel(chartType.accesibilityLabel)
+        .accessibilityElement(children: .ignore)
     }
 }
 

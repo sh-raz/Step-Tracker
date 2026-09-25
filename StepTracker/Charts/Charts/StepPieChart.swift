@@ -34,6 +34,8 @@ struct StepPieChart: View {
                     .foregroundStyle(.pink.gradient)
                     .cornerRadius(5)
                     .opacity(selectedWeekday?.date.weekdayInt == weekdayData.date.weekdayInt ? 1.0 : 0.3)
+                    .accessibilityLabel(weekdayData.date.weekdayTitle)
+                    .accessibilityValue("\(Int(weekdayData.value)) steps")
                 }
             }
             .frame(height: 240)
@@ -63,6 +65,7 @@ struct StepPieChart: View {
                                     .contentTransition(.numericText())
                             }
                             .position(x: frame.midX, y: frame.midY)
+                            .accessibilityHidden(true)
                         }
                     }
                 }
@@ -82,6 +85,7 @@ struct StepPieChart: View {
                 selectedDay = newValue.date
             }
         }
+        .accessibilityLabel(ChartType.StepPie.accesibilityLabel)
     }
 }
 
