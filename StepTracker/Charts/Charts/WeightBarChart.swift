@@ -19,17 +19,8 @@ struct WeightBarChart: View {
     }
     
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Average Weight Change",
-                                                 imageName: "figure",
-                                                 description: "Per Weekday (Last 28 Days)",
-                                                 context: .weight,
-                                                 isNav: false)
-        
-        ChartContainer(config: config) {
-            if chartData.isEmpty {
-                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
-                    .frame(height: 200)
-            }else{
+ 
+        ChartContainer(chartType: .WeightDiffBar) {
                 Chart {
                     if let selectedData {
                         ChartAnnotationView(selectedData: selectedData, context: .weight)
@@ -40,6 +31,8 @@ struct WeightBarChart: View {
                             y: .value("Weights", averageData.value)
                         )
                         .foregroundStyle(averageData.value >= 0 ? Color.indigo.gradient : Color.mint.gradient)
+                        .accessibilityLabel(averageData.date.weekdayTitle)
+                        .accessibilityValue("\(averageData.value.formatted(.number.precision(.fractionLength(1)).sign(strategy: .always()))) pounds")
                     }
                 }
                 .frame(height: 240)
@@ -59,17 +52,23 @@ struct WeightBarChart: View {
                 }
                 .chartXSelection(value: $selectedDate)
             }
-        }
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedDate) { oldValue, newValue in
             if oldValue?.weekdayInt != newValue?.weekdayInt {
                 selectedDay = newValue
             }
         }
+        .overlay {
+            if chartData.isEmpty {
+                EmptyChartView(systemImageName: "chart.bar", title: "No Data", description: "There is no weight data from the Health App.")
+                    .frame(height: 200)
+            }
+        }
+        .accessibilityLabel(ChartType.WeightDiffBar.accesibilityLabel)
     }
 }
 
 #Preview {
-    WeightBarChart(chartData: ChartMath.averageDailyWeightDiffs(for: MockData.weights))
+    WeightBarChart(chartData: ChartHelper.averageDailyWeightDiffs(for: MockData.weights))
 }
 

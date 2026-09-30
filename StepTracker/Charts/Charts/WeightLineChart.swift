@@ -22,27 +22,25 @@ struct WeightLineChart: View {
         ChartHelper.selectedData(from: chartData, in: selectedDate)
     }
     
+    var avgWeight: Double {
+        chartData.map{$0.value}.average
+    }
+    
+    
     
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Weights",
-                                                 imageName: "figure",
-                                                 description: "Avg:  pounds",
-                                                 context: .weight,
-                                                 isNav: true)
-        ChartContainer(config: config) {
-            if chartData.isEmpty {
-                EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
-                    .frame(height: 150)
-            }else{
-                Chart {
-                    if let selectedData {
-                        ChartAnnotationView(selectedData: selectedData, context: .weight)
-                    }
-                    RuleMark(y: .value("Goal", 155))
-                        .foregroundStyle(.mint)
-                        .lineStyle(.init(lineWidth: 1, dash: [5]))
-                    
-                    ForEach(chartData) { weight in
+        ChartContainer(chartType: .WeightLine(average: avgWeight)) {
+            Chart {
+                if let selectedData {
+                    ChartAnnotationView(selectedData: selectedData, context: .weight)
+                }
+                RuleMark(y: .value("Goal", 155))
+                    .foregroundStyle(.mint)
+                    .lineStyle(.init(lineWidth: 1, dash: [5]))
+                    .accessibilityHidden(true)
+                
+                ForEach(chartData) { weight in
+                    Plot{
                         AreaMark(
                             x: .value("Date", weight.date, unit: .day),
                             yStart: .value("Weight", weight.value),
@@ -59,22 +57,30 @@ struct WeightLineChart: View {
                         .interpolationMethod(.catmullRom)
                         .symbol(.circle)
                     }
+                    .accessibilityLabel(weight.date.accesibilityDate)
+                    .accessibilityValue(weight.value.formatted(.number.precision(.fractionLength(1))))
                 }
-                .frame(height: 150)
-                .chartYScale(domain: .automatic(includesZero: false))
-                .chartXAxis {
-                    AxisMarks{
-                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                    }
+            }
+            .frame(height: 150)
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis {
+                AxisMarks{
+                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
                 }
-                .chartYAxis {
-                    AxisMarks{
-                        AxisGridLine()
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                        AxisValueLabel()
-                    }
+            }
+            .chartYAxis {
+                AxisMarks{
+                    AxisGridLine()
+                        .foregroundStyle(Color.secondary.opacity(0.3))
+                    AxisValueLabel()
                 }
-                .chartXSelection(value: $selectedDate)
+            }
+            .chartXSelection(value: $selectedDate)
+            .overlay {
+                if chartData.isEmpty {
+                    EmptyChartView(systemImageName: "chart.line.downtrend.xyaxis", title: "No Data", description: "There is no weight data from the Health App.")
+                        .frame(height: 150)
+                }
             }
         }
         .onChange(of: selectedDate) { oldValue, newValue in
@@ -83,6 +89,7 @@ struct WeightLineChart: View {
                 selectedDay = new
             }
         }
+        .accessibilityLabel(ChartType.WeightLine(average: avgWeight).accesibilityLabel)
     }
 }
 

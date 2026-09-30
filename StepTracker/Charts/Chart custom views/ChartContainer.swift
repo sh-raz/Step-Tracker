@@ -7,22 +7,15 @@
 
 import SwiftUI
 
-struct ChartContainerConfiguration {
-    var title: String
-    var imageName: String
-    var description: String
-    var context: HealthMetricContext
-    var isNav: Bool
-}
-
 struct ChartContainer<Content: View>: View {
-    var config: ChartContainerConfiguration
+    
+    let chartType: ChartType
     @ViewBuilder var content: () -> Content
     
     
     var body: some View {
         VStack(alignment: .leading) {
-            if config.isNav {
+            if chartType.isNav {
                 navigationLinkView
                 content()
             }else{
@@ -40,7 +33,7 @@ struct ChartContainer<Content: View>: View {
     
     
     var navigationLinkView: some View {
-        NavigationLink(value: config.context) {
+        NavigationLink(value: chartType.context) {
             HStack {
                 titleView
                 Spacer()
@@ -49,23 +42,27 @@ struct ChartContainer<Content: View>: View {
         }
         .padding(.bottom, 12)
         .foregroundStyle(Color.secondary)
+        .accessibilityHint("Tap to show data in list")
     }
     
     
     var titleView: some View {
         VStack(alignment: .leading){
-            Label(config.title, systemImage: config.imageName)
+            Label(chartType.title, systemImage: chartType.imageName)
                 .font(.title3.bold())
-                .foregroundStyle(config.context == .steps ? Color.pink : Color.indigo)
-            Text(config.description)
+                .foregroundStyle(chartType.context == .steps ? Color.pink : Color.indigo)
+            Text(chartType.subtitle)
                 .font(.caption)
                 .foregroundStyle(Color.secondary)
         }
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityLabel(chartType.accesibilityLabel)
+        .accessibilityElement(children: .ignore)
     }
 }
 
 #Preview {
-    ChartContainer(config: ChartContainerConfiguration(title: "Steps", imageName: "figure.walk", description: "Average 12000 steps", context: .steps, isNav: false)) {
+    ChartContainer(chartType: .StepBar(average: 15000)) {
         Text("Steps")
     }
 }
