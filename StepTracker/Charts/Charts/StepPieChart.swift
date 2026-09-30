@@ -90,5 +90,5 @@ struct StepPieChart: View {
 }
 
 #Preview {
-    StepPieChart(chartData: ChartHelper.averagePerWeek(for: MockData.steps))
+    StepPieChart(chartData: ChartHelper.averageStepsPerWeekday(for: MockData.steps))
 }
